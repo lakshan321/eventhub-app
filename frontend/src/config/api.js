@@ -4,12 +4,9 @@ import { Platform } from 'react-native';
 
 /**
  * Centralized API Configuration
- * Supports both Web browser (localhost) and Mobile Phone (Local Wi-Fi IP).
+ * Connected to Live Production Backend on Render
  */
-export const API_BASE_URL = Platform.select({
-  web: 'http://localhost:5000/api',
-  default: 'http://10.220.196.37:5000/api',
-});
+export const API_BASE_URL = 'https://eventhub-app-5h26.onrender.com/api';
 
 // Create configured Axios instance
 const api = axios.create({
