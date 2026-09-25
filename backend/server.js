@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const dotenv = require('dotenv');
 
@@ -27,8 +28,14 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static image uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Health check / Base route
-app.get('/', (req, res) => {
+// Serve static frontend web build if present
+const publicDir = path.join(__dirname, 'public');
+if (fs.existsSync(publicDir)) {
+  app.use(express.static(publicDir));
+}
+
+// Health check / API status route
+app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
     message: 'EventHub Event Management API is running',
@@ -40,6 +47,16 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/bookings', bookingRoutes);
+
+// Serve frontend Single Page Application (SPA) for any other web route
+if (fs.existsSync(publicDir)) {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(publicDir, 'index.html'));
+  });
+}
 
 // Error Handling Middleware
 app.use(notFound);
