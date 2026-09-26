@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,18 @@ import {
 import api from '../config/api';
 import { AuthContext } from '../context/AuthContext';
 import EventCard from '../components/EventCard';
+import CalendarStrip from '../components/CalendarStrip';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
-const CATEGORIES = ['All', 'Technology', 'Music', 'Workshop', 'Sports', 'Business'];
+const CATEGORIES = [
+  { id: 'All', label: 'All', icon: '🌟' },
+  { id: 'Technology', label: 'Tech', icon: '💻' },
+  { id: 'Music', label: 'Music', icon: '🎵' },
+  { id: 'Workshop', label: 'Workshop', icon: '🛠️' },
+  { id: 'Sports', label: 'Sports', icon: '⚽' },
+  { id: 'Business', label: 'Business', icon: '💼' },
+];
 
 const HomeScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
@@ -24,6 +32,7 @@ const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -44,7 +53,7 @@ const HomeScreen = ({ navigation }) => {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Re-fetch when focusing screen (e.g. after creating or editing an event)
+  // Re-fetch when focusing screen (e.g. after creating, editing, or deleting an event)
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       fetchEvents();
@@ -57,7 +66,12 @@ const HomeScreen = ({ navigation }) => {
     fetchEvents();
   };
 
-  // Filter events by category and search text
+  // Extract all event dates for the calendar dots indicator
+  const eventDates = useMemo(() => {
+    return events.map((e) => e.date).filter(Boolean);
+  }, [events]);
+
+  // Filter events by: Category, Search query, and Calendar Date
   const filteredEvents = events.filter((event) => {
     const matchesCategory =
       selectedCategory === 'All' ||
@@ -67,30 +81,47 @@ const HomeScreen = ({ navigation }) => {
       event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.location?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesCategory && matchesSearch;
+    const matchesDate =
+      !selectedCalendarDate || event.date === selectedCalendarDate;
+
+    return matchesCategory && matchesSearch && matchesDate;
   });
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      <View style={styles.greetingRow}>
-        <View>
-          <Text style={styles.greetingSub}>Hello, {user?.name?.split(' ')[0] || 'Guest'} 👋</Text>
-          <Text style={styles.greetingTitle}>Discover Events</Text>
+      {/* Hero Welcome Banner */}
+      <View style={styles.heroCard}>
+        <View style={styles.heroContent}>
+          <Text style={styles.greetingSub}>
+            Welcome back, {user?.name?.split(' ')[0] || 'Guest'} 👋
+          </Text>
+          <Text style={styles.heroTitle}>Discover & Book Top Events</Text>
+          <Text style={styles.heroDescription}>
+            Find tech conferences, concerts, workshops, and campus meetups.
+          </Text>
         </View>
+
         <TouchableOpacity
           style={styles.createButton}
           onPress={() => navigation.navigate('CreateEvent')}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
           <Text style={styles.createButtonText}>+ Create Event</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Search Input */}
+      {/* Interactive Horizontal Calendar Strip */}
+      <CalendarStrip
+        selectedDate={selectedCalendarDate}
+        onSelectDate={setSelectedCalendarDate}
+        eventDates={eventDates}
+      />
+
+      {/* Search Input Bar */}
       <View style={styles.searchBar}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
-          placeholder="Search by event title or location..."
+          placeholder="Search by event title, venue, or keyword..."
           placeholderTextColor="#94A3B8"
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -103,36 +134,49 @@ const HomeScreen = ({ navigation }) => {
         )}
       </View>
 
-      {/* Category Horizontal Filter */}
+      {/* Category Pills Filter */}
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
         data={CATEGORIES}
-        keyExtractor={(item) => item}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.categoryList}
         renderItem={({ item }) => {
-          const isSelected = selectedCategory === item;
+          const isSelected = selectedCategory === item.id;
           return (
             <TouchableOpacity
-              onPress={() => setSelectedCategory(item)}
+              onPress={() => setSelectedCategory(item.id)}
               style={[
                 styles.categoryChip,
                 isSelected && styles.categoryChipSelected,
               ]}
               activeOpacity={0.7}
             >
+              <Text style={styles.categoryIcon}>{item.icon}</Text>
               <Text
                 style={[
                   styles.categoryChipText,
                   isSelected && styles.categoryChipTextSelected,
                 ]}
               >
-                {item}
+                {item.label}
               </Text>
             </TouchableOpacity>
           );
         }}
       />
+
+      {/* Active Filter Notice */}
+      {selectedCalendarDate && (
+        <View style={styles.dateFilterNotice}>
+          <Text style={styles.dateFilterText}>
+            Showing events on 📅 <Text style={{ fontWeight: '800' }}>{selectedCalendarDate}</Text>
+          </Text>
+          <TouchableOpacity onPress={() => setSelectedCalendarDate(null)}>
+            <Text style={styles.dateFilterClear}>✕ Reset</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 
@@ -174,9 +218,11 @@ const HomeScreen = ({ navigation }) => {
             <EmptyState
               title="No Events Found"
               message={
-                searchQuery
+                selectedCalendarDate
+                  ? `No events scheduled for ${selectedCalendarDate}. Try another date or category!`
+                  : searchQuery
                   ? `No events matching "${searchQuery}"`
-                  : 'Be the first to create an amazing event!'
+                  : 'Be the first to publish an amazing event!'
               }
               buttonTitle="+ Create Event"
               onButtonPress={() => navigation.navigate('CreateEvent')}
@@ -198,35 +244,51 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   headerContainer: {
-    paddingTop: 16,
-    marginBottom: 16,
+    paddingTop: 12,
+    marginBottom: 8,
   },
-  greetingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
+  heroCard: {
+    backgroundColor: '#0F172A',
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  heroContent: {
+    marginBottom: 14,
   },
   greetingSub: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '500',
+    fontSize: 13,
+    color: '#94A3B8',
+    fontWeight: '600',
+    marginBottom: 4,
   },
-  greetingTitle: {
-    fontSize: 24,
+  heroTitle: {
+    fontSize: 22,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  heroDescription: {
+    fontSize: 13,
+    color: '#CBD5E1',
+    lineHeight: 18,
   },
   createButton: {
     backgroundColor: '#4F46E5',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
     shadowColor: '#4F46E5',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 3,
   },
   createButtonText: {
     color: '#FFFFFF',
@@ -237,12 +299,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    borderRadius: 14,
+    paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 14,
-    height: 46,
+    marginBottom: 12,
+    height: 48,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   searchIcon: {
     fontSize: 16,
@@ -260,20 +327,31 @@ const styles = StyleSheet.create({
   },
   categoryList: {
     paddingVertical: 4,
-    gap: 8,
+    marginBottom: 8,
   },
   categoryChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E2E8F0',
     marginRight: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.03,
+    shadowRadius: 2,
+    elevation: 1,
   },
   categoryChipSelected: {
     backgroundColor: '#4F46E5',
     borderColor: '#4F46E5',
+  },
+  categoryIcon: {
+    fontSize: 13,
+    marginRight: 6,
   },
   categoryChipText: {
     fontSize: 13,
@@ -282,6 +360,28 @@ const styles = StyleSheet.create({
   },
   categoryChipTextSelected: {
     color: '#FFFFFF',
+  },
+  dateFilterNotice: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#EEF2FF',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    marginTop: 6,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  dateFilterText: {
+    fontSize: 13,
+    color: '#4338CA',
+  },
+  dateFilterClear: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#4F46E5',
   },
 });
 

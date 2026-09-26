@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import api from '../config/api';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
+import CalendarModalPicker from '../components/CalendarModalPicker';
 
 const CATEGORIES = ['Technology', 'Music', 'Workshop', 'Sports', 'Business'];
 
@@ -23,6 +24,7 @@ const CreateEventScreen = ({ navigation }) => {
   const [category, setCategory] = useState('Technology');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [location, setLocation] = useState('');
   const [capacity, setCapacity] = useState('');
   const [imageUri, setImageUri] = useState(null);
@@ -207,16 +209,18 @@ const CreateEventScreen = ({ navigation }) => {
 
         <View style={styles.row}>
           <View style={styles.halfField}>
-            <CustomInput
-              label="Date *"
-              placeholder="YYYY-MM-DD"
-              value={date}
-              onChangeText={(val) => {
-                setDate(val);
-                if (errors.date) setErrors((prev) => ({ ...prev, date: null }));
-              }}
-              error={errors.date}
-            />
+            <Text style={styles.fieldLabel}>Date *</Text>
+            <TouchableOpacity
+              style={[styles.datePickerBtn, errors.date && styles.inputErrorBorder]}
+              onPress={() => setShowDatePicker(true)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.datePickerIcon}>📅</Text>
+              <Text style={[styles.datePickerText, !date && styles.datePickerPlaceholder]}>
+                {date || 'Select Date'}
+              </Text>
+            </TouchableOpacity>
+            {errors.date && <Text style={styles.errorTextSmall}>{errors.date}</Text>}
           </View>
           <View style={styles.halfField}>
             <CustomInput
@@ -231,6 +235,44 @@ const CreateEventScreen = ({ navigation }) => {
             />
           </View>
         </View>
+
+        {/* Quick Time Selector Chips */}
+        <View style={styles.quickTimeRow}>
+          <Text style={styles.quickTimeLabel}>Quick Time:</Text>
+          {['09:00 AM', '11:00 AM', '02:00 PM', '06:30 PM'].map((t) => (
+            <TouchableOpacity
+              key={t}
+              onPress={() => {
+                setTime(t);
+                if (errors.time) setErrors((prev) => ({ ...prev, time: null }));
+              }}
+              style={[
+                styles.quickTimeChip,
+                time === t && styles.quickTimeChipActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.quickTimeChipText,
+                  time === t && styles.quickTimeChipTextActive,
+                ]}
+              >
+                {t}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Calendar Modal Picker */}
+        <CalendarModalPicker
+          visible={showDatePicker}
+          onClose={() => setShowDatePicker(false)}
+          onSelectDate={(pickedDate) => {
+            setDate(pickedDate);
+            if (errors.date) setErrors((prev) => ({ ...prev, date: null }));
+          }}
+          selectedDate={date}
+        />
 
         <CustomInput
           label="Location / Venue *"
@@ -387,6 +429,72 @@ const styles = StyleSheet.create({
     marginTop: -8,
     marginBottom: 12,
     marginLeft: 2,
+  },
+  errorTextSmall: {
+    color: '#EF4444',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 2,
+  },
+  datePickerBtn: {
+    height: 48,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  inputErrorBorder: {
+    borderColor: '#EF4444',
+  },
+  datePickerIcon: {
+    fontSize: 18,
+    marginRight: 8,
+  },
+  datePickerText: {
+    fontSize: 15,
+    color: '#1E293B',
+    fontWeight: '500',
+  },
+  datePickerPlaceholder: {
+    color: '#94A3B8',
+    fontWeight: '400',
+  },
+  quickTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+    marginBottom: 16,
+  },
+  quickTimeLabel: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '600',
+    marginRight: 4,
+  },
+  quickTimeChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: '#EEF2FF',
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  quickTimeChipActive: {
+    backgroundColor: '#4F46E5',
+    borderColor: '#4F46E5',
+  },
+  quickTimeChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4F46E5',
+  },
+  quickTimeChipTextActive: {
+    color: '#FFFFFF',
   },
 });
 
