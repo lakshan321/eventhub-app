@@ -116,6 +116,17 @@ const EventDetailsScreen = ({ route, navigation }) => {
         {/* Hero Image */}
         <View style={styles.imageContainer}>
           <Image source={getImageSource()} style={styles.image} resizeMode="cover" />
+          
+          <TouchableOpacity
+            style={styles.floatingBackButton}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.8}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          >
+            <Text style={styles.floatingBackArrow}>←</Text>
+            <Text style={styles.floatingBackText}>Back</Text>
+          </TouchableOpacity>
+
           <View
             style={[
               styles.statusBadge,
@@ -271,6 +282,45 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+  },
+  floatingBackButton: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    zIndex: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    ...Platform.select({
+      web: {
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+        cursor: 'pointer',
+      },
+      default: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 5,
+        elevation: 6,
+      },
+    }),
+  },
+  floatingBackArrow: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginRight: 6,
+  },
+  floatingBackText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
+    letterSpacing: 0.2,
   },
   statusBadge: {
     position: 'absolute',

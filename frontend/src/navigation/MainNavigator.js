@@ -73,41 +73,32 @@ const MainNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: '#FFFFFF' },
-        headerTintColor: '#0F172A',
-        headerTitleStyle: { fontWeight: '700' },
-        headerShadowVisible: false,
+        headerShown: false,
       }}
     >
       <Stack.Screen
         name="MainTabs"
         component={BottomTabNavigator}
-        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="EventDetails"
         component={EventDetailsScreen}
-        options={{ title: 'Event Details' }}
       />
       <Stack.Screen
         name="CreateEvent"
         component={CreateEventScreen}
-        options={{ title: 'Create Event' }}
       />
       <Stack.Screen
         name="EditEvent"
         component={EditEventScreen}
-        options={{ title: 'Edit Event' }}
       />
       <Stack.Screen
         name="Booking"
         component={BookingScreen}
-        options={{ title: 'Reserve Tickets' }}
       />
       <Stack.Screen
         name="BookingDetails"
         component={BookingDetailsScreen}
-        options={{ title: 'Ticket Pass' }}
       />
     </Stack.Navigator>
   );

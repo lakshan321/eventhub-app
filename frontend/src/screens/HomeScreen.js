@@ -89,6 +89,28 @@ const HomeScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
+      {/* Top Brand Bar */}
+      <View style={styles.topBrandBar}>
+        <View style={styles.brandTitleRow}>
+          <Text style={styles.brandIcon}>✨</Text>
+          <Text style={styles.brandName}>Event<Text style={{ color: '#4F46E5' }}>Hub</Text></Text>
+          <View style={styles.liveBadge}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveText}>COMMUNITY</Text>
+          </View>
+        </View>
+
+        <TouchableOpacity 
+          style={styles.avatarButton}
+          onPress={() => navigation.navigate('Profile')}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.avatarButtonText}>
+            {user?.name ? user.name[0].toUpperCase() : 'U'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Hero Welcome Banner */}
       <View style={styles.heroCard}>
         <View style={styles.heroContent}>
@@ -246,6 +268,69 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingTop: 12,
     marginBottom: 8,
+  },
+  topBrandBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 2,
+  },
+  brandTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  brandIcon: {
+    fontSize: 20,
+    marginRight: 6,
+  },
+  brandName: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: -0.5,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EEF2FF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    marginLeft: 10,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981',
+    marginRight: 5,
+  },
+  liveText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#4F46E5',
+    letterSpacing: 0.5,
+  },
+  avatarButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#4F46E5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  avatarButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+    fontSize: 16,
   },
   heroCard: {
     backgroundColor: '#0F172A',

@@ -11,6 +11,7 @@ import api, { API_BASE_URL } from '../config/api';
 import { formatDate, getStatusColor } from '../utils/helpers';
 import CustomButton from '../components/CustomButton';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ScreenHeader from '../components/ScreenHeader';
 
 const BookingDetailsScreen = ({ route, navigation }) => {
   const { bookingId } = route.params;
@@ -82,6 +83,12 @@ const BookingDetailsScreen = ({ route, navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <ScreenHeader
+        title="Digital Ticket Pass"
+        subtitle="Digital booking confirmation & event entry pass."
+        navigation={navigation}
+        style={styles.headerBox}
+      />
       {/* Digital Ticket Pass Card */}
       <View style={styles.ticketCard}>
         {/* Ticket Header Image */}
@@ -177,6 +184,13 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#F8FAFC',
     flexGrow: 1,
+  },
+  headerBox: {
+    marginHorizontal: -20,
+    marginTop: -20,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 16,
   },
   ticketCard: {
     backgroundColor: '#FFFFFF',

@@ -10,6 +10,7 @@ import {
 import api from '../config/api';
 import { formatDate } from '../utils/helpers';
 import CustomButton from '../components/CustomButton';
+import ScreenHeader from '../components/ScreenHeader';
 
 const BookingScreen = ({ route, navigation }) => {
   const { event } = route.params;
@@ -77,8 +78,12 @@ const BookingScreen = ({ route, navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.screenTitle}>Book Event Tickets</Text>
-      <Text style={styles.screenSub}>Review your order and select ticket quantity.</Text>
+      <ScreenHeader
+        title="Reserve Tickets"
+        subtitle="Review event details and select your ticket quantity."
+        navigation={navigation}
+        style={styles.headerBox}
+      />
 
       {/* Event Summary Card */}
       <View style={styles.eventCard}>
@@ -165,6 +170,13 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#F8FAFC',
     flexGrow: 1,
+  },
+  headerBox: {
+    marginHorizontal: -20,
+    marginTop: -20,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 16,
   },
   screenTitle: {
     fontSize: 24,

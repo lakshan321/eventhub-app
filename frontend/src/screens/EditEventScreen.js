@@ -15,6 +15,7 @@ import api, { API_BASE_URL } from '../config/api';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 import CalendarModalPicker from '../components/CalendarModalPicker';
+import ScreenHeader from '../components/ScreenHeader';
 
 const CATEGORIES = ['Technology', 'Music', 'Workshop', 'Sports', 'Business'];
 const STATUSES = ['Active', 'Cancelled', 'Completed'];
@@ -153,8 +154,12 @@ const EditEventScreen = ({ route, navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.screenTitle}>Edit Event</Text>
-        <Text style={styles.screenSub}>Modify event specifications and status.</Text>
+        <ScreenHeader
+          title="Edit Event"
+          subtitle="Modify event specifications, schedule, and current status."
+          navigation={navigation}
+          style={styles.headerBox}
+        />
 
         {/* Banner Preview and change */}
         <TouchableOpacity style={styles.imageBox} onPress={pickImage} activeOpacity={0.8}>
@@ -332,6 +337,13 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     paddingBottom: 40,
+  },
+  headerBox: {
+    marginHorizontal: -20,
+    marginTop: -20,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 16,
   },
   screenTitle: {
     fontSize: 24,

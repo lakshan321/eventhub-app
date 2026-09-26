@@ -15,6 +15,7 @@ import api from '../config/api';
 import CustomInput from '../components/CustomInput';
 import CustomButton from '../components/CustomButton';
 import CalendarModalPicker from '../components/CalendarModalPicker';
+import ScreenHeader from '../components/ScreenHeader';
 
 const CATEGORIES = ['Technology', 'Music', 'Workshop', 'Sports', 'Business'];
 
@@ -148,10 +149,12 @@ const CreateEventScreen = ({ navigation }) => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.screenTitle}>Create New Event</Text>
-        <Text style={styles.screenSub}>
-          Fill in the details below to publish your event.
-        </Text>
+        <ScreenHeader
+          title="Create New Event"
+          subtitle="Fill in the details below to publish your event to the community."
+          navigation={navigation}
+          style={styles.headerBox}
+        />
 
         {/* Image Picker Box */}
         <TouchableOpacity
@@ -332,6 +335,13 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     paddingBottom: 40,
+  },
+  headerBox: {
+    marginHorizontal: -20,
+    marginTop: -20,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingTop: 16,
   },
   screenTitle: {
     fontSize: 24,
