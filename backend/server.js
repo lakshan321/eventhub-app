@@ -50,7 +50,7 @@ app.use('/api/bookings', bookingRoutes);
 
 // Serve frontend Single Page Application (SPA) for any other web route
 if (fs.existsSync(publicDir)) {
-  app.get('*', (req, res, next) => {
+  app.get('/{*splat}', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
       return next();
     }

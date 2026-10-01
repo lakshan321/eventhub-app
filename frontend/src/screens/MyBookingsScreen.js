@@ -107,9 +107,6 @@ const MyBookingsScreen = ({ navigation }) => {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={styles.screenTitle}>My Bookings</Text>
-            <Text style={styles.screenSub}>
-              View and manage your active and past event reservations.
-            </Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -126,7 +123,7 @@ const MyBookingsScreen = ({ navigation }) => {
             title="No Bookings Yet"
             message="You haven't reserved any event tickets yet. Explore upcoming events!"
             buttonTitle="Explore Events"
-            onButtonPress={() => navigation.navigate('Home')}
+            onButtonPress={() => navigation.navigate('MainTabs', { screen: 'HomeTab' })}
           />
         }
       />
@@ -151,11 +148,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     color: '#0F172A',
-    marginBottom: 4,
-  },
-  screenSub: {
-    fontSize: 14,
-    color: '#64748B',
   },
 });
 

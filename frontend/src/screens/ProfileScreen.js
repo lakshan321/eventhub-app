@@ -5,6 +5,7 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Platform,
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import api from '../config/api';
@@ -28,6 +29,14 @@ const ProfileScreen = () => {
   }, []);
 
   const handleLogout = () => {
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm('Are you sure you want to sign out of EventHub?');
+      if (confirmed) {
+        logout();
+      }
+      return;
+    }
+
     Alert.alert('Sign Out', 'Are you sure you want to sign out of EventHub?', [
       { text: 'Cancel', style: 'cancel' },
       {

@@ -123,12 +123,12 @@ const CreateEventScreen = ({ navigation }) => {
 
       if (Platform.OS === 'web') {
         window.alert('Event created successfully!');
-        navigation.navigate('Home');
+        navigation.navigate('MainTabs', { screen: 'HomeTab' });
       } else {
         Alert.alert('Success', 'Event created successfully!', [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Home'),
+            onPress: () => navigation.navigate('MainTabs', { screen: 'HomeTab' }),
           },
         ]);
       }

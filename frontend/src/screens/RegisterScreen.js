@@ -8,6 +8,7 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 import CustomInput from '../components/CustomInput';
@@ -68,9 +69,14 @@ const RegisterScreen = ({ navigation }) => {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.logo}>🎟️</Text>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('../../assets/logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </View>
           <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join EventHub to discover and book events</Text>
         </View>
 
         <View style={styles.form}>
@@ -154,22 +160,32 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 24,
   },
-  logo: {
-    fontSize: 48,
-    marginBottom: 10,
+  logoContainer: {
+    width: 86,
+    height: 86,
+    borderRadius: 22,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 14,
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  logoImage: {
+    width: 82,
+    height: 82,
+    borderRadius: 20,
   },
   title: {
     fontSize: 26,
     fontWeight: '800',
     color: '#0F172A',
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    textAlign: 'center',
+    letterSpacing: -0.5,
   },
   form: {
     marginBottom: 20,

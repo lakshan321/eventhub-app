@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   TextInput,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import api from '../config/api';
 import { AuthContext } from '../context/AuthContext';
 import EventCard from '../components/EventCard';
-import CalendarStrip from '../components/CalendarStrip';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EmptyState from '../components/EmptyState';
 
@@ -32,7 +32,6 @@ const HomeScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -66,12 +65,7 @@ const HomeScreen = ({ navigation }) => {
     fetchEvents();
   };
 
-  // Extract all event dates for the calendar dots indicator
-  const eventDates = useMemo(() => {
-    return events.map((e) => e.date).filter(Boolean);
-  }, [events]);
-
-  // Filter events by: Category, Search query, and Calendar Date
+  // Filter events by: Category and Search query
   const filteredEvents = events.filter((event) => {
     const matchesCategory =
       selectedCategory === 'All' ||
@@ -81,63 +75,43 @@ const HomeScreen = ({ navigation }) => {
       event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       event.location?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesDate =
-      !selectedCalendarDate || event.date === selectedCalendarDate;
-
-    return matchesCategory && matchesSearch && matchesDate;
+    return matchesCategory && matchesSearch;
   });
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Top Brand Bar */}
+      {/* Top Header Bar */}
       <View style={styles.topBrandBar}>
         <View style={styles.brandTitleRow}>
-          <Text style={styles.brandIcon}>✨</Text>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={styles.brandLogoImage}
+            resizeMode="contain"
+          />
           <Text style={styles.brandName}>Event<Text style={{ color: '#4F46E5' }}>Hub</Text></Text>
-          <View style={styles.liveBadge}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveText}>COMMUNITY</Text>
-          </View>
         </View>
 
-        <TouchableOpacity 
-          style={styles.avatarButton}
-          onPress={() => navigation.navigate('Profile')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.avatarButtonText}>
-            {user?.name ? user.name[0].toUpperCase() : 'U'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.topActionsRow}>
+          <TouchableOpacity
+            style={styles.createButtonHeader}
+            onPress={() => navigation.navigate('CreateEvent')}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.createButtonHeaderIcon}>＋</Text>
+            <Text style={styles.createButtonHeaderText}>Create</Text>
+          </TouchableOpacity>
 
-      {/* Hero Welcome Banner */}
-      <View style={styles.heroCard}>
-        <View style={styles.heroContent}>
-          <Text style={styles.greetingSub}>
-            Welcome back, {user?.name?.split(' ')[0] || 'Guest'} 👋
-          </Text>
-          <Text style={styles.heroTitle}>Discover & Book Top Events</Text>
-          <Text style={styles.heroDescription}>
-            Find tech conferences, concerts, workshops, and campus meetups.
-          </Text>
+          <TouchableOpacity 
+            style={styles.avatarButton}
+            onPress={() => navigation.navigate('Profile')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.avatarButtonText}>
+              {user?.name ? user.name[0].toUpperCase() : 'U'}
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={() => navigation.navigate('CreateEvent')}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.createButtonText}>+ Create Event</Text>
-        </TouchableOpacity>
       </View>
-
-      {/* Interactive Horizontal Calendar Strip */}
-      <CalendarStrip
-        selectedDate={selectedCalendarDate}
-        onSelectDate={setSelectedCalendarDate}
-        eventDates={eventDates}
-      />
 
       {/* Search Input Bar */}
       <View style={styles.searchBar}>
@@ -187,18 +161,6 @@ const HomeScreen = ({ navigation }) => {
           );
         }}
       />
-
-      {/* Active Filter Notice */}
-      {selectedCalendarDate && (
-        <View style={styles.dateFilterNotice}>
-          <Text style={styles.dateFilterText}>
-            Showing events on 📅 <Text style={{ fontWeight: '800' }}>{selectedCalendarDate}</Text>
-          </Text>
-          <TouchableOpacity onPress={() => setSelectedCalendarDate(null)}>
-            <Text style={styles.dateFilterClear}>✕ Reset</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
   );
 
@@ -240,10 +202,10 @@ const HomeScreen = ({ navigation }) => {
             <EmptyState
               title="No Events Found"
               message={
-                selectedCalendarDate
-                  ? `No events scheduled for ${selectedCalendarDate}. Try another date or category!`
-                  : searchQuery
+                searchQuery
                   ? `No events matching "${searchQuery}"`
+                  : selectedCategory !== 'All'
+                  ? `No events found in "${selectedCategory}" category.`
                   : 'Be the first to publish an amazing event!'
               }
               buttonTitle="+ Create Event"
@@ -280,39 +242,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  brandIcon: {
-    fontSize: 20,
-    marginRight: 6,
+  brandLogoImage: {
+    width: 34,
+    height: 34,
+    borderRadius: 9,
+    marginRight: 9,
   },
   brandName: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '900',
     color: '#0F172A',
     letterSpacing: -0.5,
   },
-  liveBadge: {
+  topActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#EEF2FF',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    marginLeft: 10,
-    borderWidth: 1,
-    borderColor: '#C7D2FE',
+    gap: 8,
   },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#10B981',
-    marginRight: 5,
+  createButtonHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#4F46E5',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    marginRight: 8,
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  liveText: {
-    fontSize: 10,
+  createButtonHeaderIcon: {
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '800',
-    color: '#4F46E5',
-    letterSpacing: 0.5,
+    marginRight: 4,
+  },
+  createButtonHeaderText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
   avatarButton: {
     width: 38,
@@ -323,62 +293,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: '#4F46E5',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 3,
   },
   avatarButtonText: {
     color: '#FFFFFF',
     fontWeight: '800',
-    fontSize: 16,
-  },
-  heroCard: {
-    backgroundColor: '#0F172A',
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 12,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  heroContent: {
-    marginBottom: 14,
-  },
-  greetingSub: {
-    fontSize: 13,
-    color: '#94A3B8',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  heroTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  heroDescription: {
-    fontSize: 13,
-    color: '#CBD5E1',
-    lineHeight: 18,
-  },
-  createButton: {
-    backgroundColor: '#4F46E5',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignSelf: 'flex-start',
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 3,
-  },
-  createButtonText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 15,
   },
   searchBar: {
     flexDirection: 'row',
@@ -445,28 +367,6 @@ const styles = StyleSheet.create({
   },
   categoryChipTextSelected: {
     color: '#FFFFFF',
-  },
-  dateFilterNotice: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#EEF2FF',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 10,
-    marginTop: 6,
-    marginBottom: 6,
-    borderWidth: 1,
-    borderColor: '#C7D2FE',
-  },
-  dateFilterText: {
-    fontSize: 13,
-    color: '#4338CA',
-  },
-  dateFilterClear: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#4F46E5',
   },
 });
 
