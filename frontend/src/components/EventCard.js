@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { formatDate, getStatusColor } from '../utils/helpers';
+import { formatDate, getStatusColor, getFallbackImage } from '../utils/helpers';
 import { API_BASE_URL } from '../config/api';
 
 const CATEGORY_ICONS = {
@@ -12,18 +12,31 @@ const CATEGORY_ICONS = {
 };
 
 const EventCard = ({ event, onPress }) => {
+  const [imageError, setImageError] = useState(false);
   const statusColors = getStatusColor(event.status);
   const isSoldOut = event.availableSeats === 0;
 
-  // Resolve image URI
+  // Resolve image URI with HTTPS and fallback support
   const getImageSource = () => {
-    if (event.imageUrl) return { uri: event.imageUrl };
-    if (event.image) {
-      if (event.image.startsWith('http')) return { uri: event.image };
-      const hostUrl = API_BASE_URL.replace('/api', '');
-      return { uri: `${hostUrl}/uploads/${event.image}` };
+    if (imageError) {
+      return { uri: getFallbackImage(event.category) };
     }
-    return { uri: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600' };
+
+    let url = event.imageUrl || event.image;
+    if (url) {
+      if (typeof url === 'string') {
+        if (url.startsWith('http://') && url.includes('onrender.com')) {
+          url = url.replace('http://', 'https://');
+        }
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          return { uri: url };
+        }
+      }
+      const hostUrl = API_BASE_URL.replace('/api', '').replace('http://', 'https://');
+      return { uri: `${hostUrl}/uploads/${url}` };
+    }
+
+    return { uri: getFallbackImage(event.category) };
   };
 
   const categoryIcon =
@@ -45,6 +58,7 @@ const EventCard = ({ event, onPress }) => {
           source={getImageSource()}
           style={styles.image}
           resizeMode="cover"
+          onError={() => setImageError(true)}
         />
 
         {/* Top Badges */}

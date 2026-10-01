@@ -11,13 +11,14 @@ import {
 } from 'react-native';
 import api, { API_BASE_URL } from '../config/api';
 import { AuthContext } from '../context/AuthContext';
-import { formatDate, getStatusColor } from '../utils/helpers';
+import { formatDate, getStatusColor, getFallbackImage } from '../utils/helpers';
 import CustomButton from '../components/CustomButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const EventDetailsScreen = ({ route, navigation }) => {
   const { eventId } = route.params;
   const { user } = useContext(AuthContext);
+  const [imageError, setImageError] = useState(false);
 
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,13 +64,25 @@ const EventDetailsScreen = ({ route, navigation }) => {
   const canBook = !isSoldOut && !isCancelled;
 
   const getImageSource = () => {
-    if (event.imageUrl) return { uri: event.imageUrl };
-    if (event.image) {
-      if (event.image.startsWith('http')) return { uri: event.image };
-      const hostUrl = API_BASE_URL.replace('/api', '');
-      return { uri: `${hostUrl}/uploads/${event.image}` };
+    if (imageError) {
+      return { uri: getFallbackImage(event.category) };
     }
-    return { uri: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600' };
+
+    let url = event.imageUrl || event.image;
+    if (url) {
+      if (typeof url === 'string') {
+        if (url.startsWith('http://') && url.includes('onrender.com')) {
+          url = url.replace('http://', 'https://');
+        }
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          return { uri: url };
+        }
+      }
+      const hostUrl = API_BASE_URL.replace('/api', '').replace('http://', 'https://');
+      return { uri: `${hostUrl}/uploads/${url}` };
+    }
+
+    return { uri: getFallbackImage(event.category) };
   };
 
   const executeDelete = async () => {
@@ -115,7 +128,12 @@ const EventDetailsScreen = ({ route, navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Hero Image */}
         <View style={styles.imageContainer}>
-          <Image source={getImageSource()} style={styles.image} resizeMode="cover" />
+          <Image
+            source={getImageSource()}
+            style={styles.image}
+            resizeMode="cover"
+            onError={() => setImageError(true)}
+          />
           
           <TouchableOpacity
             style={styles.floatingBackButton}

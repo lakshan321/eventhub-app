@@ -19,6 +19,7 @@ const bookingRoutes = require('./routes/bookingRoutes');
 connectDB();
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Global Middleware
 app.use(cors());

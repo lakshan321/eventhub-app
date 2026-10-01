@@ -57,12 +57,14 @@ const upload = multer({
  */
 const getImageUrl = (req, filename) => {
   if (!filename) return null;
-  // If already an absolute URL (for future cloud storage integrations like Cloudinary/S3)
+  // If already an absolute URL
   if (filename.startsWith('http://') || filename.startsWith('https://')) {
     return filename;
   }
-  // Construct dynamic host URL from request
-  return `${req.protocol}://${req.get('host')}/uploads/${filename}`;
+  // Construct dynamic host URL from request, enforcing HTTPS on cloud hosts
+  const host = req.get('host') || '';
+  const proto = (host.includes('onrender.com') || req.headers['x-forwarded-proto'] === 'https') ? 'https' : req.protocol;
+  return `${proto}://${host}/uploads/${filename}`;
 };
 
 module.exports = {
