@@ -97,8 +97,7 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('CreateEvent')}
             activeOpacity={0.85}
           >
-            <Text style={styles.createButtonHeaderIcon}>＋</Text>
-            <Text style={styles.createButtonHeaderText}>Create</Text>
+            <Text style={styles.createButtonHeaderText}>+ Create Event</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -260,29 +259,22 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   createButtonHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#4F46E5',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
     borderRadius: 14,
-    marginRight: 8,
+    marginRight: 10,
     shadowColor: '#4F46E5',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 3,
   },
-  createButtonHeaderIcon: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '800',
-    marginRight: 4,
-  },
   createButtonHeaderText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
+    letterSpacing: 0.2,
   },
   avatarButton: {
     width: 38,
